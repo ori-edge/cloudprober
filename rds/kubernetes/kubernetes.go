@@ -45,11 +45,12 @@ const DefaultProviderID = "k8s"
 
 // ResourceTypes declares resource types supported by the Kubernetes provider.
 var ResourceTypes = struct {
-	Pods, Endpoints, Services string
+	Pods, Endpoints, Services, Clusters string
 }{
 	"pods",
 	"endpoints",
 	"services",
+	"clusters",
 }
 
 /*
@@ -151,6 +152,15 @@ func New(c *configpb.ProviderConfig, l *logger.Logger) (*Provider, error) {
 			return nil, err
 		}
 		p.listers[ResourceTypes.Services] = lr
+	}
+
+	// Enable Clusters lister if configured.
+	if c.GetClusters() != nil {
+		lr, err := newClustersLister(c.GetClusters(), c.GetNamespace(), reEvalInterval, client, l)
+		if err != nil {
+			return nil, err
+		}
+		p.listers[ResourceTypes.Clusters] = lr
 	}
 
 	return p, nil

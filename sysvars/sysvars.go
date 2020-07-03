@@ -26,7 +26,6 @@ import (
 	"sync"
 	"time"
 
-	"cloud.google.com/go/compute/metadata"
 	"github.com/google/cloudprober/config/runconfig"
 	"github.com/google/cloudprober/logger"
 	"github.com/google/cloudprober/metrics"
@@ -106,20 +105,20 @@ func Init(ll *logger.Logger, userVars map[string]string) error {
 	sysVars["hostname"] = hostname
 
 	// If on GCE, add GCE variables.
-	if metadata.OnGCE() {
-		if err := gceVars(sysVars); err != nil {
-			return err
-		}
-	} else {
-		// Note: ec2Vars doesn't return an error when not running on AWS. We still
-		// ignore errors as we don't want other platforms to be impacted if
-		// behavior of the underlying AWS libraries changes.
-		// TODO: Add a function to check if running on AWS, and then stop ignoring
-		// errors from ec2Vars.
-		if err := ec2Vars(sysVars); err != nil {
-			l.Warningf("sysvars.Init(): error getting ec2 metadata, ignoring: %v", err)
-		}
-	}
+	//if metadata.OnGCE() {
+	//	if err := gceVars(sysVars); err != nil {
+	//		return err
+	//	}
+	//} else {
+	//	// Note: ec2Vars doesn't return an error when not running on AWS. We still
+	//	// ignore errors as we don't want other platforms to be impacted if
+	//	// behavior of the underlying AWS libraries changes.
+	//	// TODO: Add a function to check if running on AWS, and then stop ignoring
+	//	// errors from ec2Vars.
+	//	if err := ec2Vars(sysVars); err != nil {
+	//		l.Warningf("sysvars.Init(): error getting ec2 metadata, ignoring: %v", err)
+	//	}
+	//}
 
 	for k, v := range userVars {
 		sysVars[k] = v

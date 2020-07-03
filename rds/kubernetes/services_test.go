@@ -38,9 +38,10 @@ func testServiceInfo(name, ns, ip, publicIP string, labels map[string]string, po
 	}
 
 	if publicIP != "" {
-		si.Status.LoadBalancer.Ingress = []struct{ IP string }{
+		si.Status.LoadBalancer.Ingress = []struct{ IP, Hostname string }{
 			{
-				IP: publicIP,
+				IP:       publicIP,
+				Hostname: "dummyHpst",
 			},
 		}
 	}

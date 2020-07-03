@@ -36,6 +36,11 @@ message ClientConf {
     //       tls_key_file: "..."
     //     }
     optional tlsconfig.TLSConfig tls_config = 3;
+
+    // Flag to enable multicluster RDS service discovery
+    optional bool multicluster = 98;
+
+    optional MultiClusterOptions multicluster_options = 99;
   }
   optional ServerOptions server_options = 1;
 
@@ -47,4 +52,11 @@ message ClientConf {
   // (specifically GCE instances/forwarding rules). This does not impact those
   // caches.
   optional int32 re_eval_sec = 3 [default = 30];
+}
+
+message MultiClusterOptions {
+
+  optional string namespace = 1 [default = "metrics"];
+  optional string service = 2 [default = "cloudprober"];
+  optional string domain = 3 [default = "helix.ori.engineering"];
 }

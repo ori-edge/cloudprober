@@ -25,7 +25,7 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/google/cloudprober/logger"
-	"github.com/google/cloudprober/rds/client"
+	rdsClient "github.com/google/cloudprober/rds/client"
 	rdspb "github.com/google/cloudprober/rds/proto"
 	configpb "github.com/google/cloudprober/targets/gce/proto"
 )
@@ -142,7 +142,7 @@ func TestInstancesTargets(t *testing.T) {
 func testGCEResources(t *testing.T, c *configpb.Instances) *gceResources {
 	gr := &gceResources{
 		resourceType: "gce_instances",
-		clients:      make(map[string]*client.Client),
+		clients:      make(map[string]rdsClient.Targets),
 		ipConfig:     instancesIPConfig(c),
 	}
 

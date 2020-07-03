@@ -62,6 +62,7 @@ import (
 	dnsRes "github.com/google/cloudprober/targets/resolver"
 
 	"github.com/google/cloudprober/rds/client"
+	rdsClient "github.com/google/cloudprober/rds/client"
 	clientconfigpb "github.com/google/cloudprober/rds/client/proto"
 	"github.com/google/cloudprober/rds/gcp"
 	rdspb "github.com/google/cloudprober/rds/proto"
@@ -95,7 +96,7 @@ type gceResources struct {
 	resourceType string
 	ipConfig     *rdspb.IPConfig
 	filters      []*rdspb.Filter
-	clients      map[string]*client.Client
+	clients      map[string]rdsClient.Targets
 
 	// DNS config
 	r      *dnsRes.Resolver
@@ -124,7 +125,7 @@ func initRDSServer(resourceType, apiVersion string, projects []string, reEvalInt
 	return srv, nil
 }
 
-func newRDSClient(req *rdspb.ListResourcesRequest, listResourcesFunc client.ListResourcesFunc, l *logger.Logger) (*client.Client, error) {
+func newRDSClient(req *rdspb.ListResourcesRequest, listResourcesFunc client.ListResourcesFunc, l *logger.Logger) (rdsClient.Targets, error) {
 	c := &clientconfigpb.ClientConf{
 		Request:   req,
 		ReEvalSec: proto.Int32(10), // Refresh client every 10s.
@@ -210,7 +211,7 @@ func New(conf *configpb.TargetsConf, globalOpts *configpb.GlobalOptions, res *dn
 	gr := &gceResources{
 		c:          conf,
 		ipConfig:   instancesIPConfig(conf.GetInstances()),
-		clients:    make(map[string]*client.Client),
+		clients:    make(map[string]rdsClient.Targets),
 		globalOpts: globalOpts,
 		l:          l,
 	}

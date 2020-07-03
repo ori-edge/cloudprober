@@ -144,7 +144,7 @@ func (li *lister) newRDSServer() (*server.Server, error) {
 	return server.New(context.Background(), &serverconfigpb.ServerConf{Provider: []*serverconfigpb.Provider{pc}}, nil, li.l)
 }
 
-func (li *lister) rdsClient(baseResourcePath string, additionalFilter *rdspb.Filter) (*rdsclient.Client, error) {
+func (li *lister) rdsClient(baseResourcePath string, additionalFilter *rdspb.Filter) (rdsclient.Targets, error) {
 	rdsClientConf := &rdsclientpb.ClientConf{
 		ServerOptions: li.rdsServerOpts,
 		Request: &rdspb.ListResourcesRequest{
@@ -222,7 +222,7 @@ type lister struct {
 	pubsubTopic       string
 	rdsServerOpts     *rdsclientpb.ClientConf_ServerOptions
 	listResourcesFunc rdsclient.ListResourcesFunc
-	clients           []*rdsclient.Client
+	clients           []rdsclient.Targets
 	l                 *logger.Logger
 }
 

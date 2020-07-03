@@ -47,6 +47,17 @@ type cacheRecord struct {
 	labels map[string]string
 }
 
+// Targets interface is redefined here (originally defined in targets.go) to
+// allow returning private gceResources.
+type Targets interface {
+	// ListEndpoints produces list of targets.
+	ListEndpoints() []endpoint.Endpoint
+	// Resolve, given a target name and IP Version will return the IP address for
+	// that target.
+	Resolve(name string, ipVer int) (net.IP, error)
+	refreshState(time.Duration)
+}
+
 // Default RDS port
 const defaultRDSPort = "9314"
 
@@ -71,6 +82,7 @@ func (client *Client) refreshState(timeout time.Duration) {
 	ctx, cancelFunc := context.WithTimeout(context.Background(), timeout)
 	defer cancelFunc()
 
+	client.l.Infof("DEBUG: request path: %s", client.c.GetRequest().GetResourcePath())
 	response, err := client.listResources(ctx, client.c.GetRequest())
 	if err != nil {
 		client.l.Errorf("rds.client: error getting resources from RDS server: %v", err)
@@ -183,13 +195,18 @@ func (client *Client) initListResourcesFunc() error {
 
 // New creates an RDS (ResourceDiscovery service) client instance and set it up
 // for continuous refresh.
-func New(c *configpb.ClientConf, listResources ListResourcesFunc, l *logger.Logger) (*Client, error) {
+func New(c *configpb.ClientConf, listResources ListResourcesFunc, l *logger.Logger) (Targets, error) {
 	client := &Client{
 		c:             c,
 		serverOpts:    c.GetServerOptions(),
 		cache:         make(map[string]*cacheRecord),
 		listResources: listResources,
 		l:             l,
+	}
+
+	// Special handling of the multicluster case
+	if client.serverOpts.GetMulticluster() {
+		return NewMultiClient(c, listResources, l)
 	}
 
 	if err := client.initListResourcesFunc(); err != nil {
